@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - SiSampah</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        .header { background: #3498db; color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background: #3498db; color: white; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+        select { padding: 5px; border-radius: 5px; }
+        .btn-update { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .status-baru { color: #e74c3c; font-weight: bold; }
+        .status-proses { color: #f39c12; font-weight: bold; }
+        .status-selesai { color: #2ecc71; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>👮 Panel Admin SiSampah</h1></div>
+    <br>
+    <table>
+        <tr>
+            <th>ID</th><th>Nama</th><th>Lokasi</th><th>Deskripsi</th>
+            <th>Foto</th><th>Status</th><th>Tanggal</th><th>Aksi</th>
+        </tr>
+        {% for row in laporan %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td><img src="{{ row[4] }}" alt="foto"></td>
+            <td class="status-{{ row[5] }}">{{ row[5].upper() }}</td>
+            <td>{{ row[6].strftime('%d/%m/%Y') }}</td>
+            <td>
+                <form method="POST" action="/update/{{ row[0] }}">
+                    <select name="status">
+                        <option value="baru">Baru</option>
+                        <option value="proses">Proses</option>
+                        <option value="selesai">Selesai</option>
+                    </select>
+                    <button type="submit" class="btn-update">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
