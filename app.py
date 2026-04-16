@@ -1,84 +1,109 @@
 from flask import Flask, render_template, request, redirect, url_for
 import boto3
-import psycopg2
+import pymysql
 import os
-from datetime import datetime
 import uuid
 
 app = Flask(__name__)
 
-# Koneksi ke S3
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
-    aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'),
-    region_name='ap-southeast-2'
-)
-BUCKET_NAME = os.environ.get('S3_BUCKET')
-
-# Koneksi ke RDS (database)
-def get_db():
-    return psycopg2.connect(
-        host=os.environ.get('DB_HOST'),
-        database=os.environ.get('DB_NAME'),
-        user=os.environ.get('DB_USER'),
-        password=os.environ.get('DB_PASS')
+# =========================
+# S3 (LAZY INIT - FIX MEMORY ISSUE)
+# =========================
+def get_s3():
+    return boto3.client(
+        's3',
+        aws_access_key_id=os.environ.get('AWS_ACCESS_KEY'),
+        aws_secret_access_key=os.environ.get('AWS_SECRET_KEY'),
+        region_name='ap-southeast-2'
     )
 
-# Buat tabel kalau belum ada
+BUCKET_NAME = os.environ.get('S3_BUCKET')
+
+# =========================
+# DATABASE
+# =========================
+def get_db():
+    return pymysql.connect(
+        host=os.environ.get('DB_HOST'),
+        user=os.environ.get('DB_USER'),
+        password=os.environ.get('DB_PASS'),
+        database=os.environ.get('DB_NAME'),
+        connect_timeout=5
+    )
+
+# =========================
+# INIT DB
+# =========================
 def init_db():
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('''
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS laporan (
-            id SERIAL PRIMARY KEY,
+            id INT AUTO_INCREMENT PRIMARY KEY,
             nama TEXT,
             lokasi TEXT,
             deskripsi TEXT,
             foto_url TEXT,
-            status TEXT DEFAULT 'baru',
-            tanggal TIMESTAMP DEFAULT NOW()
+            status VARCHAR(50) DEFAULT 'baru',
+            tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
     conn.commit()
     cur.close()
     conn.close()
 
-# FITUR 1: Halaman utama
+# =========================
+# ROUTE HOME
+# =========================
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# FITUR 2: Form laporan + upload foto ke S3
+# =========================
+# LAPORAN
+# =========================
 @app.route('/laporan', methods=['GET', 'POST'])
 def laporan():
     if request.method == 'POST':
-        nama = request.form['nama']
-        lokasi = request.form['lokasi']
-        deskripsi = request.form['deskripsi']
-        foto = request.files['foto']
+        try:
+            nama = request.form.get('nama')
+            lokasi = request.form.get('lokasi')
+            deskripsi = request.form.get('deskripsi')
+            foto = request.files.get('foto')
 
-        # Upload foto ke S3
-        filename = f"{uuid.uuid4()}_{foto.filename}"
-        s3.upload_fileobj(foto, BUCKET_NAME, filename)
-        foto_url = f"https://{BUCKET_NAME}.s3.amazonaws.com/{filename}"
+            if not all([nama, lokasi, deskripsi, foto]):
+                return "Data tidak lengkap", 400
 
-        # Simpan ke database RDS
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO laporan (nama, lokasi, deskripsi, foto_url) VALUES (%s, %s, %s, %s)",
-            (nama, lokasi, deskripsi, foto_url)
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
+            filename = f"{uuid.uuid4()}_{foto.filename}"
 
-        return redirect(url_for('index'))
+            # upload S3
+            s3 = get_s3()
+            s3.upload_fileobj(foto, BUCKET_NAME, filename)
+
+            foto_url = f"https://{BUCKET_NAME}.s3.amazonaws.com/{filename}"
+
+            # save DB
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO laporan (nama, lokasi, deskripsi, foto_url) VALUES (%s,%s,%s,%s)",
+                (nama, lokasi, deskripsi, foto_url)
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            print("ERROR:", e)
+            return str(e), 500
 
     return render_template('laporan.html')
 
-# FITUR 3: Dashboard admin
+# =========================
+# ADMIN
+# =========================
 @app.route('/admin')
 def admin():
     conn = get_db()
@@ -87,20 +112,28 @@ def admin():
     data = cur.fetchall()
     cur.close()
     conn.close()
+
     return render_template('admin.html', laporan=data)
 
-# Update status laporan
+# =========================
+# UPDATE STATUS
+# =========================
 @app.route('/update/<int:id>', methods=['POST'])
 def update_status(id):
-    status = request.form['status']
+    status = request.form.get('status')
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute("UPDATE laporan SET status=%s WHERE id=%s", (status, id))
     conn.commit()
     cur.close()
     conn.close()
+
     return redirect(url_for('admin'))
 
+# =========================
+# MAIN
+# =========================
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
