@@ -3,48 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Laporan - SiSampah</title>
+    <title>Buat Laporan — SiSampah</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    <div class="container" style="max-width: 700px;">
-        <div class="header-section" style="padding: 40px 20px;">
-            <h1><i class="fas fa-bullhorn"></i> Buat Laporan</h1>
-            <p>Isi data di bawah dengan lengkap dan sertakan foto bukti.</p>
-        </div>
 
-        <div class="card">
-            <form method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Nama Pelapor</label>
-                    <input type="text" name="nama" required placeholder="Masukkan nama lengkap Anda">
-                </div>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/" class="navbar-brand">
+        <div class="logo-icon">🗑️</div>
+        SiSampah
+    </a>
+    <ul class="navbar-links">
+        <li><a href="/laporan">Buat Laporan</a></li>
+        <li><a href="/admin">Panel Admin</a></li>
+    </ul>
+</nav>
 
-                <div class="form-group">
-                    <label><i class="fas fa-map-marker-alt"></i> Lokasi Sampah</label>
-                    <input type="text" name="lokasi" required placeholder="Contoh: Jl. Merdeka No. 5, Bandung">
-                </div>
+<div class="container" style="max-width:660px;">
 
-                <div class="form-group">
-                    <label><i class="fas fa-align-left"></i> Deskripsi Kondisi</label>
-                    <textarea name="deskripsi" rows="4" required placeholder="Ceritakan detail kondisi sampah di lokasi tersebut..."></textarea>
-                </div>
+    <a href="/" class="back-link">← Kembali ke Beranda</a>
 
-                <div class="form-group">
-                    <label><i class="fas fa-camera"></i> Foto Bukti</label>
-                    <input type="file" name="foto" accept="image/*" required style="border: none; padding: 10px 0;">
-                </div>
-
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px;">
-                    <a href="/" style="color: #999; text-decoration: none;"><i class="fas fa-arrow-left"></i> Kembali</a>
-                    <button type="submit" class="btn btn-main">
-                        <i class="fas fa-paper-plane"></i> Kirim Laporan
-                    </button>
-                </div>
-            </form>
-        </div>
+    <div class="page-header">
+        <h1>📝 Buat Laporan Sampah</h1>
+        <p>Isi formulir di bawah ini untuk melaporkan titik sampah liar yang kamu temukan</p>
     </div>
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label class="form-label">Nama Pelapor</label>
+                <input type="text" name="nama" class="form-control" required placeholder="Masukkan nama lengkap kamu">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Lokasi Sampah</label>
+                <input type="text" name="lokasi" class="form-control" required placeholder="Contoh: Jl. Merdeka No. 5, Bandung">
+                <p class="form-hint">Tulis alamat selengkap mungkin agar mudah ditemukan petugas</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Deskripsi Kondisi</label>
+                <textarea name="deskripsi" class="form-control" rows="4" required placeholder="Jelaskan kondisi sampah: jenis, volume, tingkat urgensi..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Foto Bukti</label>
+                <div class="file-input-wrapper" id="fileWrapper">
+                    <input type="file" name="foto" accept="image/*" required id="fotoInput">
+                    <span class="file-input-icon">📷</span>
+                    <div class="file-input-text" id="fileText">
+                        <strong>Pilih foto</strong> atau seret ke sini<br>
+                        <span style="font-size:0.75rem;margin-top:4px;display:block;">JPG, PNG, WebP · Maks 10MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <a href="/" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">🚀 Kirim Laporan</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<footer class="footer">
+    © 2025 SiSampah · Sistem Informasi Pelaporan Sampah Liar
+</footer>
+
+<script>
+    // Update file input label on selection
+    document.getElementById('fotoInput').addEventListener('change', function() {
+        const name = this.files[0]?.name || '';
+        if (name) {
+            document.getElementById('fileText').innerHTML = `<strong>📎 ${name}</strong><br><span style="font-size:0.75rem;color:#0ea672;">File dipilih — siap diunggah</span>`;
+        }
+    });
+</script>
+
 </body>
 </html>

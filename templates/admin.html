@@ -3,63 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - SiSampah</title>
+    <title>Panel Admin — SiSampah</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header-section" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));">
-            <h1><i class="fas fa-user-check"></i> Panel Admin</h1>
-            <p>Kelola dan pantau status laporan masyarakat.</p>
-        </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Pelapor</th>
-                        <th>Lokasi</th>
-                        <th>Foto</th>
-                        <th>Status</th>
-                        <th>Tanggal</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in laporan %}
-                    <tr>
-                        <td style="font-weight: 600; color: #999;">#{{ row[0] }}</td>
-                        <td style="font-weight: 500;">{{ row[1] }}</td>
-                        <td><small>{{ row[2] }}</small></td>
-                        <td><img src="{{ row[4] }}" class="img-thumbnail" alt="foto"></td>
-                        <td>
-                            <span class="badge status-{{ row[5] }}">
-                                {{ row[5] }}
-                            </span>
-                        </td>
-                        <td>{{ row[6].strftime('%d/%m/%y') }}</td>
-                        <td>
-                            <form method="POST" action="/update/{{ row[0] }}" style="display: flex; gap: 5px; justify-content: center;">
-                                <select name="status" style="width: auto; padding: 5px; font-size: 0.8rem;">
-                                    <option value="baru" {% if row[5] == 'baru' %}selected{% endif %}>Baru</option>
-                                    <option value="proses" {% if row[5] == 'proses' %}selected{% endif %}>Proses</option>
-                                    <option value="selesai" {% if row[5] == 'selesai' %}selected{% endif %}>Selesai</option>
-                                </select>
-                                <button type="submit" class="btn btn-update">Update</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/" class="navbar-brand">
+        <div class="logo-icon">🗑️</div>
+        SiSampah
+    </a>
+    <ul class="navbar-links">
+        <li><a href="/laporan">Buat Laporan</a></li>
+        <li><a href="/admin">Panel Admin</a></li>
+    </ul>
+</nav>
+
+<div class="container-wide">
+
+    <a href="/" class="back-link">← Kembali ke Beranda</a>
+
+    <!-- Header -->
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:16px;">
+        <div class="page-header" style="margin-bottom:0;">
+            <h1>👮 Panel Admin</h1>
+            <p>Kelola dan perbarui status laporan sampah yang masuk</p>
         </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="/" class="btn" style="background: #eee; color: #666;"><i class="fas fa-home"></i> Beranda</a>
+        <a href="/laporan" class="btn btn-primary" style="white-space:nowrap;">+ Tambah Laporan</a>
+    </div>
+
+    <!-- Summary Badges -->
+    <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+        <div style="background:#fde8ec; color:#e53e5e; padding:8px 16px; border-radius:100px; font-size:0.8rem; font-weight:700; border:1px solid #fcc;">
+            🔴 Baru
+        </div>
+        <div style="background:#fef3cd; color:#d97706; padding:8px 16px; border-radius:100px; font-size:0.8rem; font-weight:700; border:1px solid #f6d860;">
+            🟡 Dalam Proses
+        </div>
+        <div style="background:#e6f7f1; color:#0ea672; padding:8px 16px; border-radius:100px; font-size:0.8rem; font-weight:700; border:1px solid #a8dfc8;">
+            🟢 Selesai
         </div>
     </div>
+
+    <!-- Table -->
+    {% if laporan %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Pelapor</th>
+                    <th>Lokasi</th>
+                    <th>Deskripsi</th>
+                    <th>Foto</th>
+                    <th>Status</th>
+                    <th>Tanggal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in laporan %}
+                <tr>
+                    <td style="font-weight:700; color:#4361ee;">{{ row[0] }}</td>
+                    <td>
+                        <div style="font-weight:600; color:#1a1f36; font-size:0.88rem;">{{ row[1] }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.85rem; max-width:160px;">{{ row[2] }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.83rem; color:#8892b0; max-width:200px; line-height:1.5;">
+                            {{ row[3][:80] }}{% if row[3]|length > 80 %}…{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="{{ row[4] }}" target="_blank">
+                            <img src="{{ row[4] }}" alt="Foto laporan">
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ row[5] }}">
+                            {% if row[5] == 'baru' %}🔴{% elif row[5] == 'proses' %}🟡{% else %}🟢{% endif %}
+                            {{ row[5].upper() }}
+                        </span>
+                    </td>
+                    <td style="font-size:0.82rem; color:#8892b0; white-space:nowrap;">
+                        {{ row[6].strftime('%d %b %Y') }}
+                    </td>
+                    <td>
+                        <form method="POST" action="/update/{{ row[0] }}" style="display:flex; gap:8px; align-items:center;">
+                            <select name="status" class="status-select">
+                                <option value="baru" {% if row[5] == 'baru' %}selected{% endif %}>Baru</option>
+                                <option value="proses" {% if row[5] == 'proses' %}selected{% endif %}>Proses</option>
+                                <option value="selesai" {% if row[5] == 'selesai' %}selected{% endif %}>Selesai</option>
+                            </select>
+                            <button type="submit" class="btn-danger-sm">Simpan</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:16px; font-size:0.82rem; color:#8892b0; text-align:right;">
+        Total: {{ laporan|length }} laporan
+    </div>
+
+    {% else %}
+    <div class="table-wrapper">
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Belum ada laporan yang masuk.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer class="footer">
+    © 2025 SiSampah · Panel Administrasi
+</footer>
+
 </body>
 </html>
