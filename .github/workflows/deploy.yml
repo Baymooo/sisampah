@@ -20,7 +20,9 @@ jobs:
 
       - name: Build & Push
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/sisampah:latest .
+          # --no-cache: Memaksa Docker mendownload & install ulang semua layer
+          # --pull: Memastikan base image (python:3.11-slim) menggunakan versi terbaru
+          docker build --no-cache --pull -t ${{ secrets.DOCKER_USERNAME }}/sisampah:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/sisampah:latest
 
       - name: Deploy EC2
