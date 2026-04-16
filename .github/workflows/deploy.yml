@@ -30,6 +30,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Mengambil nilai secret ke dalam variabel lokal shell dan menghapus spasi
+            S3_CLEAN=$(echo "${{ secrets.S3_BUCKET }}" | xargs)
+            
             docker pull ${{ secrets.DOCKER_USERNAME }}/sisampah:latest
             docker stop sisampah || true
             docker rm sisampah || true
@@ -39,10 +42,9 @@ jobs:
               --restart unless-stopped \
               -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY }}" \
               -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_KEY }}" \
-              -e S3_BUCKET="${{ secrets.S3_BUCKET }}" \
+              -e S3_BUCKET="$S3_CLEAN" \
               -e DB_HOST="${{ secrets.DB_HOST }}" \
               -e DB_NAME="${{ secrets.DB_NAME }}" \
               -e DB_USER="${{ secrets.DB_USER }}" \
               -e DB_PASS="${{ secrets.DB_PASS }}" \
               ${{ secrets.DOCKER_USERNAME }}/sisampah:latest
-              

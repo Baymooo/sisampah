@@ -17,7 +17,7 @@ def get_s3():
         region_name='ap-southeast-2'
     )
 
-BUCKET_NAME = os.environ.get('S3_BUCKET')
+BUCKET_NAME = os.environ.get('S3_BUCKET').strip() if os.environ.get('S3_BUCKET') else None
 
 # =========================
 # DATABASE
