@@ -25,10 +25,10 @@ BUCKET_NAME = os.environ.get('S3_BUCKET').strip() if os.environ.get('S3_BUCKET')
 # =========================
 def get_db():
     return pymysql.connect(
-        host=os.environ.get('DB_HOST'),
-        user=os.environ.get('DB_USER'),
-        password=os.environ.get('DB_PASS'),
-        database=os.environ.get('DB_NAME'),
+        host=os.environ.get('DB_HOST').strip(),
+        user=os.environ.get('DB_USER').strip(),
+        password=os.environ.get('DB_PASS').strip(),
+        database=os.environ.get('DB_NAME').strip(),
         connect_timeout=5
     )
 
