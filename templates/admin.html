@@ -2,50 +2,63 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - SiSampah</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
-        .header { background: #3498db; color: white; padding: 20px; border-radius: 10px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th { background: #3498db; color: white; padding: 12px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-        img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
-        select { padding: 5px; border-radius: 5px; }
-        .btn-update { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-        .status-baru { color: #e74c3c; font-weight: bold; }
-        .status-proses { color: #f39c12; font-weight: bold; }
-        .status-selesai { color: #2ecc71; font-weight: bold; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SiSampah</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="header"><h1>👮 Panel Admin SiSampah</h1></div>
-    <br>
-    <table>
-        <tr>
-            <th>ID</th><th>Nama</th><th>Lokasi</th><th>Deskripsi</th>
-            <th>Foto</th><th>Status</th><th>Tanggal</th><th>Aksi</th>
-        </tr>
-        {% for row in laporan %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td><img src="{{ row[4] }}" alt="foto"></td>
-            <td class="status-{{ row[5] }}">{{ row[5].upper() }}</td>
-            <td>{{ row[6].strftime('%d/%m/%Y') }}</td>
-            <td>
-                <form method="POST" action="/update/{{ row[0] }}">
-                    <select name="status">
-                        <option value="baru">Baru</option>
-                        <option value="proses">Proses</option>
-                        <option value="selesai">Selesai</option>
-                    </select>
-                    <button type="submit" class="btn-update">Update</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container">
+        <div class="header-section" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));">
+            <h1><i class="fas fa-user-check"></i> Panel Admin</h1>
+            <p>Kelola dan pantau status laporan masyarakat.</p>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Pelapor</th>
+                        <th>Lokasi</th>
+                        <th>Foto</th>
+                        <th>Status</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in laporan %}
+                    <tr>
+                        <td style="font-weight: 600; color: #999;">#{{ row[0] }}</td>
+                        <td style="font-weight: 500;">{{ row[1] }}</td>
+                        <td><small>{{ row[2] }}</small></td>
+                        <td><img src="{{ row[4] }}" class="img-thumbnail" alt="foto"></td>
+                        <td>
+                            <span class="badge status-{{ row[5] }}">
+                                {{ row[5] }}
+                            </span>
+                        </td>
+                        <td>{{ row[6].strftime('%d/%m/%y') }}</td>
+                        <td>
+                            <form method="POST" action="/update/{{ row[0] }}" style="display: flex; gap: 5px; justify-content: center;">
+                                <select name="status" style="width: auto; padding: 5px; font-size: 0.8rem;">
+                                    <option value="baru" {% if row[5] == 'baru' %}selected{% endif %}>Baru</option>
+                                    <option value="proses" {% if row[5] == 'proses' %}selected{% endif %}>Proses</option>
+                                    <option value="selesai" {% if row[5] == 'selesai' %}selected{% endif %}>Selesai</option>
+                                </select>
+                                <button type="submit" class="btn btn-update">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="/" class="btn" style="background: #eee; color: #666;"><i class="fas fa-home"></i> Beranda</a>
+        </div>
+    </div>
 </body>
 </html>
