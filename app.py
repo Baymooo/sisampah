@@ -3,8 +3,7 @@ import boto3
 import pymysql
 import os
 import uuid
-import cryptography
-import gunicorn
+
 
 app = Flask(__name__)
 
